@@ -26,19 +26,33 @@ export const exportShippingListToExcel = (shippingItems: any[], fileName: string
 
 export const exportInvoiceToPDF = (invoiceData: Invoice, fileName: string = 'invoice.pdf'): void => {
   const doc = new jsPDF();
+  const companyName = "Generox";
+  let yPos = 15;
+
+  // Add Company Name
+  doc.setFontSize(16);
+  doc.setFont(undefined, 'bold');
+  doc.text(companyName, 14, yPos);
+  yPos += 10;
 
   // Add a title
   doc.setFontSize(22);
-  doc.text('Invoice', 14, 22);
+  doc.setFont(undefined, 'normal'); // Reset font style
+  doc.text('Invoice', 14, yPos);
+  yPos += 10;
 
   // Add invoice details
   doc.setFontSize(12);
-  doc.text(`Invoice ID: ${invoiceData.id}`, 14, 32);
-  doc.text(`Customer: ${invoiceData.customerName}`, 14, 39);
-  doc.text(`Date: ${new Date(invoiceData.invoiceDate).toLocaleDateString()}`, 14, 46);
+  doc.text(`Invoice ID: ${invoiceData.id}`, 14, yPos);
+  yPos += 7;
+  doc.text(`Customer: ${invoiceData.customerName}`, 14, yPos);
+  yPos += 7;
+  doc.text(`Date: ${new Date(invoiceData.invoiceDate).toLocaleDateString()}`, 14, yPos);
+  yPos += 7;
   
   if (invoiceData.dueDate) {
-    doc.text(`Due Date: ${new Date(invoiceData.dueDate).toLocaleDateString()}`, 14, 53);
+    doc.text(`Due Date: ${new Date(invoiceData.dueDate).toLocaleDateString()}`, 14, yPos);
+    yPos += 7;
   }
 
   // Prepare table data
@@ -57,7 +71,7 @@ export const exportInvoiceToPDF = (invoiceData: Invoice, fileName: string = 'inv
 
   // Add table
   autoTable(doc, {
-    startY: (invoiceData.dueDate ? 53 : 46) + 10, // Adjust startY based on whether dueDate is present
+    startY: yPos + 5, // Adjust startY
     head: [tableColumn],
     body: tableRows,
     theme: 'striped',
@@ -68,7 +82,7 @@ export const exportInvoiceToPDF = (invoiceData: Invoice, fileName: string = 'inv
   // Add totals
   let finalY = (doc as any).lastAutoTable.finalY; // Get Y position after table
   if (finalY === undefined) { // Fallback if finalY is not set
-    finalY = (invoiceData.dueDate ? 53 : 46) + 10 + (invoiceData.items.length + 1) * 10; // Estimate
+    finalY = yPos + 5 + (invoiceData.items.length + 1) * 10; // Estimate
   }
 
 
@@ -88,3 +102,4 @@ export const exportInvoiceToPDF = (invoiceData: Invoice, fileName: string = 'inv
 
   doc.save(fileName);
 };
+
