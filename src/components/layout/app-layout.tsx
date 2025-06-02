@@ -1,7 +1,8 @@
+
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { AppWindow, LayoutDashboard, Package, FileText, Truck, Star, Menu, Settings } from 'lucide-react';
+import { AppWindow, LayoutDashboard, Package, FileText, Truck, Star, Menu, Settings, History } from 'lucide-react'; // Added History
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -20,6 +21,7 @@ const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard, pageTitle: 'Dashboard Overview' },
   { href: '/products', label: 'Products', icon: Package, pageTitle: 'Product Management' },
   { href: '/invoices', label: 'Invoices', icon: FileText, pageTitle: 'Invoice Generation' },
+  { href: '/invoice-history', label: 'Invoice History', icon: History, pageTitle: 'Invoice History' }, // Added Invoice History
   { href: '/shipping', label: 'Shipping', icon: Truck, pageTitle: 'Shipping List' },
   { href: '/favorites', label: 'Favorites', icon: Star, pageTitle: 'Favorite Products' },
 ];

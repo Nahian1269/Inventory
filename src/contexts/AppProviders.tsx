@@ -1,17 +1,18 @@
+
 'use client';
 
 import React, { type ReactNode } from 'react';
 import { ProductProvider } from './ProductContext';
 import { FavoritesProvider } from './FavoritesContext';
-// Import other providers here if needed, e.g., InvoiceProvider
+import { InvoiceProvider } from './InvoiceContext'; // Import InvoiceProvider
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ProductProvider>
       <FavoritesProvider>
-        {/* <InvoiceProvider> */}
+        <InvoiceProvider> 
           {children}
-        {/* </InvoiceProvider> */}
+        </InvoiceProvider>
       </FavoritesProvider>
     </ProductProvider>
   );

@@ -1,25 +1,31 @@
+
 'use client';
 import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useProducts } from '@/contexts/ProductContext';
-import type { Product, InvoiceItem } from '@/lib/types';
+import type { Product, InvoiceItem, Invoice } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, PlusCircle, Trash2, Download, User, CalendarDays } from 'lucide-react';
+import { Search, PlusCircle, Trash2, Download, User, CalendarDays, Phone, Home } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { exportInvoiceToPDF } from '@/lib/export';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useInvoices } from '@/contexts/InvoiceContext'; // Import useInvoices
 
 export default function InvoicesPage() {
   const { products, getProductById, updateInventory } = useProducts();
+  const { addInvoice } = useInvoices(); // Get addInvoice function
   const { toast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
   const [customerName, setCustomerName] = useState('');
+  const [customerPhoneNumber, setCustomerPhoneNumber] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   
   const [searchResults, setSearchResults] = useState<Product[]>([]);
@@ -71,7 +77,7 @@ export default function InvoicesPage() {
         },
       ];
     });
-    setSearchTerm(''); // Clear search after adding
+    setSearchTerm(''); 
     setSearchResults([]);
   };
 
@@ -104,7 +110,7 @@ export default function InvoicesPage() {
   };
 
   const subTotal = useMemo(() => invoiceItems.reduce((sum, item) => sum + item.totalPrice, 0), [invoiceItems]);
-  const taxRate = 0.1; // Example 10% tax
+  const taxRate = 0.1; 
   const taxAmount = subTotal * taxRate;
   const grandTotal = subTotal + taxAmount;
 
@@ -133,9 +139,11 @@ export default function InvoicesPage() {
     });
 
     if (allUpdatesSuccessful) {
-      const invoiceData = {
+      const invoiceData: Invoice = { // Ensure type is Invoice
         id: `INV-${Date.now()}`,
         customerName,
+        customerPhoneNumber: customerPhoneNumber || undefined,
+        customerAddress: customerAddress || undefined,
         invoiceDate,
         items: invoiceItems,
         subTotal,
@@ -143,12 +151,15 @@ export default function InvoicesPage() {
         taxAmount,
         grandTotal,
       };
-      console.log('Generated Invoice:', invoiceData);
-      exportInvoiceToPDF(invoiceData, `Invoice_${customerName.replace(/\s/g, '_')}.pdf`);
-      toast({ title: 'Invoice Generated!', description: `Invoice for ${customerName} created and inventory updated.` });
-      // Reset form
+      
+      exportInvoiceToPDF(invoiceData, `Invoice_${customerName.replace(/\s/g, '_')}_${invoiceData.id}.pdf`);
+      addInvoice(invoiceData); // Save invoice to context
+      toast({ title: 'Invoice Generated!', description: `Invoice for ${customerName} created, saved, and inventory updated.` });
+      
       setInvoiceItems([]);
       setCustomerName('');
+      setCustomerPhoneNumber('');
+      setCustomerAddress('');
       setSearchTerm('');
     }
   };
@@ -170,6 +181,14 @@ export default function InvoicesPage() {
               <Label htmlFor="invoiceDate" className="flex items-center mb-1"><CalendarDays className="w-4 h-4 mr-2 text-muted-foreground" />Invoice Date</Label>
               <Input id="invoiceDate" type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} />
             </div>
+            <div>
+              <Label htmlFor="customerPhoneNumber" className="flex items-center mb-1"><Phone className="w-4 h-4 mr-2 text-muted-foreground" />Customer Phone (Optional)</Label>
+              <Input id="customerPhoneNumber" value={customerPhoneNumber} onChange={(e) => setCustomerPhoneNumber(e.target.value)} placeholder="Enter customer phone number" />
+            </div>
+            <div>
+              <Label htmlFor="customerAddress" className="flex items-center mb-1"><Home className="w-4 h-4 mr-2 text-muted-foreground" />Customer Address (Optional)</Label>
+              <Textarea id="customerAddress" value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} placeholder="Enter customer address" rows={3}/>
+            </div>
           </div>
 
           <div className="relative">
@@ -180,7 +199,7 @@ export default function InvoicesPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setTimeout(() => setIsSearchFocused(false), 100)} // Delay to allow click on results
+              onBlur={() => setTimeout(() => setIsSearchFocused(false), 100)} 
             />
             {isSearchFocused && searchResults.length > 0 && (
               <Card className="absolute z-10 w-full mt-1 shadow-lg max-h-60 overflow-y-auto">

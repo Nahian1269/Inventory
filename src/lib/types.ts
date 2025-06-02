@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string; // User-defined Product ID, should be unique
   name: string;
@@ -20,7 +21,9 @@ export interface InvoiceItem {
 
 export interface Invoice {
   id: string; // Auto-generated or user-defined
-  customerName: string; // Simple customer name for now
+  customerName: string; 
+  customerPhoneNumber?: string; // Optional customer phone number
+  customerAddress?: string; // Optional customer address
   items: InvoiceItem[];
   subTotal: number;
   taxRate: number; // Percentage, e.g., 0.05 for 5%
